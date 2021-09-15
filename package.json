@@ -1,0 +1,19 @@
+{
+  "name": "life_restart",
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 80
+  },
+  "scripts": {
+    "serve": "cd lifeRestart && npm i && npm run dev",
+    "cheat": "node cheat.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.14.1",
+    "signale": "^1.4.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.4.0"
+  }
+}

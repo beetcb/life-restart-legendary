@@ -1,0 +1,3 @@
+[submodule "lifeRestart"]
+	path = lifeRestart
+	url = https://github.com/VickScarlet/lifeRestart.git
