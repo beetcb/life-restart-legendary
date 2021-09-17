@@ -1,10 +1,13 @@
-import { chromium } from 'playwright'
+import { chromium, devices } from 'playwright'
 import l from 'signale'
 const browser = await chromium.launch()
 const page = await browser.newPage()
 
+await browser.newContext({
+  ...devices['Pixel 2'],
+})
+
 await page.goto('http://localhost:8080/view/index.html')
-await page.setViewportSize({ width: 1368, height: 761 })
 
 // Pre
 async function pre() {
@@ -17,12 +20,12 @@ async function pre() {
 // Choose talents
 async function talentsSelect() {
   await page.waitForSelector('#talents')
-  const talents = await page.$$('#talents > .grade0b')
+  const talents = await page.$$('#talents>*')
   const [t1, t2, t3] = talents
-  l.watch(` 任选天赋
-  ${await t1.innerText()}
-  ${await t2.innerText()}
-  ${await t3.innerText()}`)
+  l.watch(`<任选天赋>
+    ${await t1.innerText()}
+    ${await t2.innerText()}
+    ${await t3.innerText()}`)
 
   await t1.click()
   await t2.click()
@@ -32,6 +35,15 @@ async function talentsSelect() {
 async function life() {
   await (await page.waitForSelector('#next')).click()
   await (await page.waitForSelector('#random')).click()
+  await page.waitForSelector('#propertyAllocation')
+  const props = await page.$$('#propertyAllocation>li>input')
+  const [p1, p2, p3, p4] = props
+  l.watch(`<属性分配>
+    颜值：${await p1.inputValue()}
+    智力：${await p2.inputValue()}
+    体质：${await p3.inputValue()}
+    家境：${await p4.inputValue()}`)
+  
   await (await page.waitForSelector('#start')).click()
 
   let [curAge, lastTimeAge] = [-1, 0]
@@ -43,8 +55,7 @@ async function life() {
     curAge = parseInt(await curAgeEle.innerText())
     await curAgeEle.click()
   }
-  l.note(`寿命：${curAge}
-    `)
+  l.note(`寿命：${curAge}`)
 
   return curAge
 }
@@ -55,9 +66,12 @@ async function live() {
   return await life()
 }
 
-let age = -1
+let [age, maxAge] = [-1, -1]
 while (age < 100) {
   age = await live()
+  maxAge = age > maxAge ? age : maxAge
+  l.note(`最高寿命：${maxAge}
+  `)
   await page.reload()
 }
 
