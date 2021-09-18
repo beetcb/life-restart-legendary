@@ -4,11 +4,9 @@ import l from 'signale'
 let lifeTrace = []
 let [age, maxAge] = [-1, -1]
 
+const startTimestamp = new Date().getTime()
 const browser = await chromium.launch()
 const context = await browser.newContext({
-  recordVideo: {
-    dir: 'video-logs',
-  },
   ...devices['Pixel 2'],
 })
 
@@ -77,15 +75,16 @@ async function live() {
 
 while (age < 100) {
   age = await live().catch(async () => {
-    /* 逃过属性冲突报错 */
+    // 逃过属性冲突报错
     page = await context.newPage()
     return -1
   })
   maxAge = age > maxAge ? age : maxAge
-  l.note(`最高寿命：${maxAge}
+  l.note(`最高寿命：${maxAge}岁 累计用时：${(
+    (new Date().getTime() - startTimestamp) /
+    60000
+  ).toFixed(2)} 分钟
   `)
-
-  await page.reload()
 }
 
 l.success(`传奇人生轨迹
