@@ -11,11 +11,12 @@ const context = await browser.newContext({
   },
   ...devices['Pixel 2'],
 })
-const page = await context.newPage()
-await page.goto('http://localhost:8080/view/index.html')
+
+let page = await context.newPage()
 
 // Pre
 async function pre() {
+  await page.goto('http://localhost:8080/view/index.html')
   await (await page.waitForSelector('#restart')).click()
   await (await page.waitForSelector('#random')).click()
 }
@@ -75,8 +76,9 @@ async function live() {
 }
 
 while (age < 100) {
-  age = await live().catch((e) => {
+  age = await live().catch(async () => {
     /* 逃过属性冲突报错 */
+    page = await context.newPage()
     return -1
   })
   maxAge = age > maxAge ? age : maxAge
