@@ -1,7 +1,10 @@
 import { chromium, devices } from 'playwright'
 import l from 'signale'
 
-const browser = await chromium.launch({ headless: false })
+let lifeTrace = []
+let [age, maxAge] = [-1, -1]
+
+const browser = await chromium.launch()
 const context = await browser.newContext({
   recordVideo: {
     dir: 'video-logs',
@@ -46,13 +49,18 @@ async function life() {
 
   await (await page.waitForSelector('#start')).click()
 
+  lifeTrace = []
   let [curAge, lastTimeAge] = [-1, 0]
   while (curAge != lastTimeAge) {
     lastTimeAge = curAge
     const curAgeEle = await page.waitForSelector(
       '#lifeTrajectory>li:last-child>span'
     )
+    const curAgeStatusEle = await page.$(
+      '#lifeTrajectory>li:last-child>span:nth-child(2)'
+    )
     curAge = parseInt(await curAgeEle.innerText())
+    lifeTrace.push(`${curAge}：${await curAgeStatusEle.innerText()}`)
     await curAgeEle.click()
   }
   l.note(`寿命：${curAge}`)
@@ -66,9 +74,11 @@ async function live() {
   return await life()
 }
 
-let [age, maxAge] = [-1, -1]
 while (age < 100) {
-  age = await live()
+  age = await live().catch((e) => {
+    /* 逃过属性冲突报错 */
+    return -1
+  })
   maxAge = age > maxAge ? age : maxAge
   l.note(`最高寿命：${maxAge}
   `)
@@ -76,5 +86,7 @@ while (age < 100) {
   await page.reload()
 }
 
-l.success('百岁高寿')
-browser.close()
+l.success(`传奇人生轨迹
+    ${lifeTrace.join(`
+    `)}`)
+await browser.close()

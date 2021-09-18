@@ -1,5 +1,6 @@
 {
-  "name": "life_restart",
+  "name": "life_restart_legendary",
+  "private": "true",
   "prettier": {
     "semi": false,
     "singleQuote": true,
