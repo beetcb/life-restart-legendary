@@ -1,26 +1,26 @@
 import { chromium, devices } from 'playwright'
 import l from 'signale'
-const browser = await chromium.launch()
-const page = await browser.newPage()
 
-await browser.newContext({
+const browser = await chromium.launch({ headless: false })
+const context = await browser.newContext({
+  recordVideo: {
+    dir: 'video-logs',
+  },
   ...devices['Pixel 2'],
 })
-
+const page = await context.newPage()
 await page.goto('http://localhost:8080/view/index.html')
 
 // Pre
 async function pre() {
-  await page.waitForSelector('#restart')
-  await page.click('#restart')
-  await page.waitForSelector('#random')
-  await page.click('#random')
+  await (await page.waitForSelector('#restart')).click()
+  await (await page.waitForSelector('#random')).click()
 }
 
 // Choose talents
 async function talentsSelect() {
   await page.waitForSelector('#talents')
-  const talents = await page.$$('#talents>*')
+  const talents = await page.$$('#talents>li')
   const [t1, t2, t3] = talents
   l.watch(`<任选天赋>
     ${await t1.innerText()}
@@ -43,7 +43,7 @@ async function life() {
     智力：${await p2.inputValue()}
     体质：${await p3.inputValue()}
     家境：${await p4.inputValue()}`)
-  
+
   await (await page.waitForSelector('#start')).click()
 
   let [curAge, lastTimeAge] = [-1, 0]
@@ -72,6 +72,7 @@ while (age < 100) {
   maxAge = age > maxAge ? age : maxAge
   l.note(`最高寿命：${maxAge}
   `)
+
   await page.reload()
 }
 
