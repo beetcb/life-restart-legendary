@@ -74,8 +74,9 @@ async function live() {
 }
 
 while (age < 100) {
-  age = await live().catch(async () => {
+  age = await live().catch(async (e) => {
     // 逃过属性冲突报错
+    console.log(e)
     page = await context.newPage()
     return -1
   })
